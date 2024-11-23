@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ServerGame106.Models;
 using SeverGame106.Models;
 
 namespace SeverGame106.Data
