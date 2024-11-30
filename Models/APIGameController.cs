@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -145,9 +146,16 @@ namespace ServerGame106.Models
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user != null && await _userManager.CheckPasswordAsync(user, password))
                 {
+                    var token = GenerateJwtToken(user);
+                    var data = new
+                    {
+                        token = token,
+                        user = user
+                    };
+
                     _response.IsSuccess = true;
                     _response.Notification = "Dang nhap thanh cong";
-                    _response.Data = user;
+                    _response.Data = data;
                     return Ok(_response);
                 }
                 else
@@ -565,6 +573,26 @@ namespace ServerGame106.Models
             signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        [HttpGet("GetAllResultByUser/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetAllResultByUser(string userId)
+        {
+            try
+            {
+                var result = await _db.LevelResults.Where(x => x.UserId == userId).ToListAsync();
+                _response.IsSuccess = true;
+                _response.Notification = "Lấy dữ liệu thành công";
+                _response.Data = result;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Notification = "Lỗi";
+                _response.Data = ex.Message;
+                return BadRequest(_response);
+            }
         }
 
     }
